@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Notes</title>
+</head>
+<body>
+    <h1>My Notes</h1>
+    
+    <form action="/add_note" method="post">
+        <input type="text" name="title" placeholder="Note Title" required><br>
+        <textarea name="content" placeholder="Note Content" required></textarea><br>
+        <button type="submit">Add Note</button>
+    </form>
+
+    <h2>All Notes</h2>
+    <ul>
+        {% for note in notes %}
+            <li>
+                <a href="{{ url_for('view_note', note_id=note[0]) }}">{{ note[1] }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
