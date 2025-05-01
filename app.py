@@ -1,5 +1,7 @@
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for
+
+
 
 app = Flask(__name__)
 
@@ -7,49 +9,84 @@ app = Flask(__name__)
 def init_db():
     conn = sqlite3.connect('notes.db')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS notes
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT)''')
+
+    # Create table with time column
+    c.execute(''' 
+        CREATE TABLE IF NOT EXISTS notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            content TEXT,
+            time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 
-# Call init_db to create the database and table when the app starts
+# Call init_db at app start
 init_db()
 
 @app.route('/')
 def home():
-    # Fetch all notes from the database
     conn = sqlite3.connect('notes.db')
     c = conn.cursor()
-    c.execute("SELECT * FROM notes")
-    notes = c.fetchall()
+    c.execute("SELECT id, title, CASE WHEN INSTR(content, CHAR(10)) > 0 THEN SUBSTR(content, 1, INSTR(content, CHAR(10)) - 1) ELSE content END AS first_line, time FROM notes ORDER BY id DESC LIMIT 8;")
+    notes = [{"id": note[0], "title": note[1], "content": note[2], "timestamp": note[3]} for note in c.fetchall()]
+    
     conn.close()
     return render_template('index.html', notes=notes)
 
-@app.route('/add_note', methods=['POST'])
-def add_note():
-    if request.method == 'POST':
-        note_title = request.form['title']
-        note_content = request.form['content']
+@app.route('/note')
+def allnotes():
+    conn = sqlite3.connect('notes.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM notes")
+    note = c.fetchall()
+    conn.close()
 
-        # Insert the new note into the database
-        conn = sqlite3.connect('notes.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO notes (title, content) VALUES (?, ?)", (note_title, note_content))
-        conn.commit()
-        conn.close()
-
-        return redirect(url_for('home'))
+    if note:
+        return render_template('viewnotes.html', notes=note)
+    else:
+        return "Note not found", 404
 
 @app.route('/note/<int:note_id>')
 def view_note(note_id):
-    # Fetch a single note by its ID
     conn = sqlite3.connect('notes.db')
     c = conn.cursor()
+    
+    # Fetch the note by its ID
     c.execute("SELECT * FROM notes WHERE id = ?", (note_id,))
     note = c.fetchone()
     conn.close()
 
-    return render_template('note.html', note=note)
+    if note:
+        # Pass the note as a dictionary to the template
+        return render_template('note.html', notes={"id": note[0], "title": note[1], "content": note[2]})
+    else:
+        return "Note not found", 404
+@app.route('/edit/<int:note_id>', methods=['POST'])
+def edit_note(note_id):
+    title = request.form['title']
+    content = request.form['content']
+    
+    conn = sqlite3.connect('notes.db')
+    c = conn.cursor()
+    (c.execute("UPDATE notes SET title=?, content=? WHERE id=?", (title, content, note_id)))
+    
+
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('home'))
+@app.route('/delete/<int:note_id>', methods=['POST'])
+def delete_note(note_id):
+    conn = sqlite3.connect('notes.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM notes WHERE id=?", (note_id,))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('home'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

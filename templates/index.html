@@ -4,23 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Notes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 </head>
 <body>
-    <h1>My Notes</h1>
-    
-    <form action="/add_note" method="post">
-        <input type="text" name="title" placeholder="Note Title" required><br>
-        <textarea name="content" placeholder="Note Content" required></textarea><br>
-        <button type="submit">Add Note</button>
-    </form>
 
-    <h2>All Notes</h2>
-    <ul>
+<section class="bg-dark text-light p-5 text-center">
+    <div class="container">
+        <h1>Secure-<span class="text-warning">notes app</span></h1>
+        <p>Providing a secure environment for users to view and edit their notes, accessible worldwide.</p>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-4"><i class="bi bi-file-text display-4"></i><p>Notes</p></div>
+            <div class="col-md-4"><i class="bi bi-shield-lock display-4"></i><p>Safe</p></div>
+            <div class="col-md-4"><i class="bi bi-globe display-4"></i><p>Accessible</p></div>
+        </div>
+    </div>
+</section>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">Notes App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link fw-bold" href="{{ url_for('home') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link fw-bold" href="{{ url_for('allnotes') }}">All Notes</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <form class="d-flex">
+        <div class="input-group">
+            <input class="form-control form-control-lg" type="search" placeholder="Search notes (not functional yet)">
+            <button class="btn btn-primary px-4" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center">Recent Notes</h2>
+    <div class="row">
         {% for note in notes %}
-            <li>
-                <a href="{{ url_for('view_note', note_id=note[0]) }}">{{ note[1] }}</a>
-            </li>
+        <div class="col-md-3 mb-4">
+            <div class="card p-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ note.title }}</h5>
+                    <p class="card-text">{{ note.content }}</p>
+                    <p class="text-muted"><i class="bi bi-clock"></i> {{ note.timestamp }}</p>
+                    <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-primary btn-lg">View</a>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
