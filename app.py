@@ -19,6 +19,8 @@ def init_db():
             time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    c.execute('''INSERT INTO notes(title, content) VALUES (?, ?)''', ('hello', 'sjoebgfue 081njqeotkhu'))
     conn.commit()
     conn.close()
 
@@ -85,6 +87,14 @@ def delete_note(note_id):
     conn.commit()
     conn.close()
     
+    return redirect(url_for('home'))
+@app.route('/delete_all', methods=['POST'])
+def delete_all():
+    conn = sqlite3.connect('notes.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM notes")  
+    conn.commit()
+    conn.close()
     return redirect(url_for('home'))
 
 

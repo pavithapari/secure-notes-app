@@ -19,6 +19,10 @@
             </tr>
         </thead>
         <tbody>
+        <!-- Delete Button -->
+        <form action="{{ url_for('delete_all') }}" method="POST">
+            <button type="submit" class="btn btn-danger">Delete ALL</button>
+        </form>
             {% for note in notes %}
             <tr>
                 <td>{{ note[0] }}</td>
